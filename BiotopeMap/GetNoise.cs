@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.ColorSpaces;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Reflection.Metadata;
 using System.Security.Principal;
-namespace Games
+namespace BiotopeMap
 {
     namespace GetNoise
     {
@@ -22,7 +22,7 @@ namespace Games
                 XorRand = xorRand;
             }
 
-            public void createMono(List<NoisePram> noisePram, int ImageHeight = 500, int ImageWidth = 500, int StarX = 0, int StartY = 0, String SavePath = "..\\test.png")
+            public void CreateImag(List<NoisePram> noisePram, int ImageHeight = 500, int ImageWidth = 500, int StarX = 0, int StartY = 0, String SavePath = "..\\test.png")
             {
                 GetNoise getNoise = new GetNoise(XorRand);
                 //空の画像を生成
