@@ -16,62 +16,7 @@ namespace BiotopeMap
         /// <summary>
         /// 確認画像生成用クラス
         /// </summary>
-        public class CreateMapImg
-        {
-
-            public CreateMapImg()
-            {
-            }
-
-            public void CreateImag(double[][] NoiseArray, int h = 180, String SavePath = "..\\test.png")
-            {
-                //空の画像を生成
-                var img = new Image<Rgba32>(NoiseArray.Length, NoiseArray[0].Length);
-
-                if (h > 255)
-                {
-                    h = 255;
-                }
-                for (int i = 0; i < img.Height; i++)
-                {
-                    for (int j = 0; j < img.Width; j++)
-                    {
-                        double dnc = NoiseArray[i][j];
-                        if (dnc < h)
-                        {
-                            img[i, j] = new Rgba32(30, 50, (byte)dnc);
-                        }
-                        else if (dnc >= h)
-                        {
-                            var d = 0;
-                            if (dnc > 255) { d = 255; } else { d = (int)dnc; }
-                            img[i, j] = new Rgba32(90, (byte)d, 95);
-                        }
-                        else
-                        {
-                            img[i, j] = new Rgba32(1, 1, 100);
-                        }
-
-                    }
-                    //img[i, j] = new Rgba32(0, 0, blue);
-
-                }
-                Console.WriteLine(img[1, 1]);
-                try
-                {
-                    img.Save(SavePath);
-                }
-                catch (ArgumentNullException e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-                catch (NotSupportedException ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-
-            }
-        }
+        
         public class GetNoiseArray
         {
             private XorShiftAddPool XorRand;
@@ -82,13 +27,19 @@ namespace BiotopeMap
             }
 
 
-            public double[][] GetContourArray(List<NoisePram> noisePram, int h = 500, int w = 500, int StartX = 0, int StartY = 0)
+            public NoiseArray GetContourArray(NoiseArrayPram pram)
             {
                 GetNoise getNoise = new GetNoise(XorRand);
-                double[][] CountorArray = new double[h][];
+                var h = pram.h;
+                var w = pram.w;
+                var StartX = pram.startX;
+                var StartY = pram.startY;
+                var noisePram = pram.noisePrams;
+                List<List<double>> CountorArray = new();
 
                 ParallelOptions option = new ParallelOptions();
                 option.MaxDegreeOfParallelism = 4;
+                object lockObject = new object();
                 for (int i = 0 + StartX; i < h + StartX; i++)
                 {
                     double[] data = new double[w];
@@ -97,12 +48,32 @@ namespace BiotopeMap
                     {
 
                         double denc = getNoise.OctavesNoise(noisePram, (double)i, (double)j);
-                        double height = Math.Round(denc * 256);
-                        data[j]=height;
+                        double height = 0;
+                        switch (pram.mode)
+                        {
+                            case NoiseValueMode.gradation256:
+                                height = Math.Round(denc * 256);
+                                break;
+                            case NoiseValueMode.binary:
+                                height = denc > pram.threshold ? 1 : 0;
+                                break;
+                            default:
+                                height = Math.Round(denc * 256);
+                                break;
+                        }
+                        lock (lockObject)
+                        {
+                            data[j - StartY] = height;
+                        }
                     });
-                    CountorArray[i]=data;
+                    CountorArray.Add(new List<double>(data));
                 }
-                return CountorArray;
+                NoiseArray array = new NoiseArray
+                {
+                    array = CountorArray,
+                    mode = pram.mode
+                };
+                return array;
             }
         }
 
@@ -170,16 +141,16 @@ namespace BiotopeMap
                     }
                     switch (noisePram[i].Mode)
                     {
-                        case 0:
+                        case NoiseCompoundMode.plus:
                             density += total / maxValue;
                             break;
-                        case 1:
+                        case NoiseCompoundMode.multi:
                             density *= total / maxValue;
                             break;
-                        case 2:
+                        case NoiseCompoundMode.minus:
                             density -= total / maxValue;
                             break;
-                        case 3:
+                        case NoiseCompoundMode.divid:
                             density /= total / maxValue;
                             break;
                         default:
@@ -321,6 +292,60 @@ namespace BiotopeMap
                 return a + (b - a) * t;
             }
         }
+        public enum NoiseCompoundMode : int
+        {
+            plus = 0,
+            multi = 1,
+            minus = 2,
+            divid = 3,
+        }
+        public enum NoiseValueMode : int
+        {
+            /// <summary>
+            /// gradation mode 0~256
+            /// </summary>
+            gradation256 = 0,
+            /// <summary>
+            /// binary mode 0or1
+            /// </summary>
+            binary = 1
+        }
+        public record NoiseArray
+        {
+            public List<List<double>> array = new();
+            public NoiseValueMode mode = NoiseValueMode.gradation256;
+        }
+        /// <summary>
+        /// a
+        /// </summary>
+        public record NoiseArrayPram
+        {
+            /// <summary>
+            /// noise parameter list
+            /// </summary>
+            public List<NoisePram> noisePrams { get; set; } = new();
+            /// <summary>
+            /// array height
+            /// </summary>
+            public int h { get; set; } = 500;
+            /// <summary>
+            /// array width
+            /// </summary>
+            public int w { get; set; } = 500;
+            /// <summary>
+            /// generate start x
+            /// </summary>
+            public int startX { get; set; } = 0;
+            /// <summary>
+            /// generate start y
+            /// </summary>
+            public int startY { get; set; } = 0;
+            /// <summary>
+            /// generate mode <br></br>
+            /// </summary>
+            public NoiseValueMode mode { get; set; } = NoiseValueMode.binary;
+            public double threshold { get; set; } = 0;
+        }
 
         /// <summary>
         /// オクターブノイズ用パラメータクラス
@@ -346,7 +371,7 @@ namespace BiotopeMap
             /// <summary>
             /// 合成モード 0=加算 1=乗算 2=減算 3=除算
             /// </summary>
-            public int Mode { get; set; } = 0;
+            public NoiseCompoundMode Mode { get; set; } = NoiseCompoundMode.plus;
 
             public double OffsetX { get; set; } = 0;
             public double OffsetY { get; set; } = 0;
