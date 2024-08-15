@@ -6,6 +6,9 @@ using SixLabors.ImageSharp.ColorSpaces;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Reflection.Metadata;
 using System.Security.Principal;
+using static BiotopeMap.GetNoise.GetNoiseArray;
+using System.Threading.Tasks;
+
 namespace BiotopeMap
 {
     namespace GetNoise
@@ -15,56 +18,93 @@ namespace BiotopeMap
         /// </summary>
         public class CreateMapImg
         {
-            private XorShiftAddPool XorRand;
 
-            public CreateMapImg(XorShiftAddPool xorRand)
+            public CreateMapImg()
             {
-                XorRand = xorRand;
             }
 
-            public void CreateImag(List<NoisePram> noisePram, int ImageHeight = 500, int ImageWidth = 500, int StarX = 0, int StartY = 0, String SavePath = "..\\test.png")
+            public void CreateImag(double[][] NoiseArray, int h = 180, String SavePath = "..\\test.png")
             {
-                GetNoise getNoise = new GetNoise(XorRand);
                 //空の画像を生成
-                var img = new Image<Rgba32>(ImageHeight, ImageWidth);
-                List<List<double>> CheckImg = new();
-                double Maxblue = 0;
-                double Minblue = 2;
-                for (int i = 0; i < img.Height; i++)
-                {
-                    List<double> data = new List<double>();
-                    for (int j = 0; j < img.Width; j++)
-                    {
+                var img = new Image<Rgba32>(NoiseArray.Length, NoiseArray[0].Length);
 
-                        float blue = (float)getNoise.OctavesNoise(noisePram, (double)i, (double)j);
-                        data.Add(blue);
-                        if (Maxblue < blue) Maxblue = blue;
-                        if (Minblue > blue) Minblue = blue;
-                    }
-                    CheckImg.Add(data);
+                if (h > 255)
+                {
+                    h = 255;
                 }
                 for (int i = 0; i < img.Height; i++)
                 {
                     for (int j = 0; j < img.Width; j++)
                     {
-                        if (CheckImg[i][j] < ((Maxblue - Minblue) / 4 * 1) + Minblue)
+                        double dnc = NoiseArray[i][j];
+                        if (dnc < h)
                         {
-                            img[i, j] = new Rgba32(30, 50, 125);
+                            img[i, j] = new Rgba32(30, 50, (byte)dnc);
                         }
-                        else if (CheckImg[i][j] < ((Maxblue - Minblue) / 4 * 2) + Minblue)
-                            img[i, j] = new Rgba32(30, 130, 220);
-                        else if (CheckImg[i][j] < ((Maxblue - Minblue) / 4 * 3) + Minblue)
-                            img[i, j] = new Rgba32(200, 200, 120);
+                        else if (dnc >= h)
+                        {
+                            var d = 0;
+                            if (dnc > 255) { d = 255; } else { d = (int)dnc; }
+                            img[i, j] = new Rgba32(90, (byte)d, 95);
+                        }
                         else
-                            img[i, j] = new Rgba32(150, 190, 100);
+                        {
+                            img[i, j] = new Rgba32(1, 1, 100);
+                        }
+
                     }
                     //img[i, j] = new Rgba32(0, 0, blue);
 
                 }
-                img.Save(SavePath);
+                Console.WriteLine(img[1, 1]);
+                try
+                {
+                    img.Save(SavePath);
+                }
+                catch (ArgumentNullException e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+                catch (NotSupportedException ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+
             }
         }
+        public class GetNoiseArray
+        {
+            private XorShiftAddPool XorRand;
 
+            public GetNoiseArray(XorShiftAddPool xorRand)
+            {
+                XorRand = xorRand;
+            }
+
+
+            public double[][] GetContourArray(List<NoisePram> noisePram, int h = 500, int w = 500, int StartX = 0, int StartY = 0)
+            {
+                GetNoise getNoise = new GetNoise(XorRand);
+                double[][] CountorArray = new double[h][];
+
+                ParallelOptions option = new ParallelOptions();
+                option.MaxDegreeOfParallelism = 4;
+                for (int i = 0 + StartX; i < h + StartX; i++)
+                {
+                    double[] data = new double[w];
+                    Parallel.For(0 + StartY, w + StartY, j =>
+                    //(int j = 0 + StartY; j < w + StartY; j++)
+                    {
+
+                        double denc = getNoise.OctavesNoise(noisePram, (double)i, (double)j);
+                        double height = Math.Round(denc * 256);
+                        data[j]=height;
+                    });
+                    CountorArray[i]=data;
+                }
+                return CountorArray;
+            }
+        }
 
         /// <summary>
         /// ノイズ生成クラス

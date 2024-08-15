@@ -1,5 +1,6 @@
 using BiotopeMap.GetNoise;
 using XorShiftAddSharp;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TestProject2
 {
@@ -11,6 +12,21 @@ namespace TestProject2
         {
             get { return testContextInstance; }
             set { testContextInstance = value; }
+        }
+        [TestMethod]
+        public void GetCounterTest1()
+        {
+            XorShiftAddPool xorShiftAddPool = new(23);
+            BiotopeMap.GetNoise.GetNoiseArray grad = new(xorShiftAddPool);
+            NoisePram noisePram = new();
+            noisePram.Frequency = 2;
+            noisePram.Persistence = (double)1;
+            noisePram.Octaves = 3;
+            noisePram.Scale = 1000;
+            List<NoisePram> noisePrams = new();
+            noisePrams.Add(noisePram);
+            var nl = grad.GetContourArray(noisePrams);
+            Console.WriteLine(nl.ToString());
         }
 
         [TestMethod]
@@ -46,28 +62,28 @@ namespace TestProject2
         public void CreateMapImgTest1()
         {
             XorShiftAddPool xorShiftAddPool = new(23);
-            BiotopeMap.GetNoise.CreateMapImg grad = new(xorShiftAddPool);
+            BiotopeMap.GetNoise.GetNoiseArray grad = new(xorShiftAddPool);
             List<NoisePram> noisePrams = new();
-
+            int scale = 10;
             NoisePram noisePram1 = new NoisePram();
             noisePram1.Frequency = 2;
             noisePram1.Persistence = 1;
             noisePram1.Octaves = 3;
-            noisePram1.Scale = 200;
+            noisePram1.Scale = 15*scale;
             noisePram1.Mode = 0;
 
             NoisePram noisePram2 = new NoisePram();
             noisePram2.Frequency = 0.5;
             noisePram2.Persistence = 20;
             noisePram2.Octaves = 2;
-            noisePram2.Scale = 200;
+            noisePram2.Scale = 15 * scale;
             noisePram2.Mode = 1;
 
             NoisePram noisePram3 = new NoisePram();
             noisePram3.Frequency = 2;
             noisePram3.Persistence = 1;
             noisePram3.Octaves = 1;
-            noisePram3.Scale = 400;
+            noisePram3.Scale = 30 * scale;
             noisePram3.Mode = 1;
             noisePram3.OffsetX = 256;
             noisePram3.OffsetY = 256;
@@ -76,7 +92,7 @@ namespace TestProject2
             noisePram4.Frequency = 2;
             noisePram4.Persistence = 1;
             noisePram4.Octaves = 1;
-            noisePram4.Scale = 2000;
+            noisePram4.Scale = 150 * scale;
             noisePram4.Mode = 0;
             noisePram4.OffsetX = 1000;
             noisePram4.OffsetY = 1000;
@@ -85,8 +101,17 @@ namespace TestProject2
             noisePrams.Add(noisePram2);
             noisePrams.Add(noisePram3);
             noisePrams.Add(noisePram4);
+            var NoiseArray= grad.GetContourArray(h:2000,w:2000,noisePram: noisePrams, StartY: 0, StartX: 0);
+            CreateMapImg img = new();
+            //string path = "..\\test.png";
+            //img.CreateImag(NoiseArray,SavePath: path);
+            for (int i = 0; i < 30; i++)
+            {
+                int h = i * 5 + 100;
+                string path = "..\\test" + i + ".png";
+                img.CreateImag(NoiseArray, h: h, SavePath: path);
 
-            grad.createMono(noisePrams, 2000, 2000);
+            }
         }
     }
 }
