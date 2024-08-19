@@ -9,18 +9,22 @@ namespace BiotopeMap
     public record TerraInfo
     {
         public Blocks blocks { get; set; }
-        public int height { get; set; }
+        public double height { get; set; }
     }
 
     public record TerraBlocks
     {
-        public static Blocks Gland { get;private set; } = new Blocks()
+        public static Blocks Gland = new Blocks()
         {
             Name = "grand"
         };
-        public static Blocks Water { get; private set; } = new Blocks()
+        public static Blocks Water = new Blocks()
         {
             Name = "water"
+        };
+        public static Blocks Sea = new Blocks()
+        {
+            Name = "sea"
         };
     }
     public record Blocks

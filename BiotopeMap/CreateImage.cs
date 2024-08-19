@@ -68,10 +68,8 @@ namespace BiotopeMap
 
 
                     }
-                    //img[i, j] = new Rgba32(0, 0, blue);
 
                 }
-                Console.WriteLine(img[1, 1]);
                 try
                 {
                     img.Save(SavePath);
@@ -85,6 +83,52 @@ namespace BiotopeMap
                     Console.WriteLine(ex.ToString());
                 }
 
+            }
+            public void CreateImag(List<List<TerraInfo>> terraInfos, int h = 180, String SavePath = "..\\test.png")
+            {
+                var array = terraInfos;
+                //空の画像を生成
+                var img = new Image<Rgba32>(array.Count, array[0].Count);
+
+                if (h > 255)
+                {
+                    h = 255;
+                }
+                for (int i = 0; i < img.Height; i++)
+                {
+                    for (int j = 0; j < img.Width; j++)
+                    {
+                        int dnc = (int)array[i][j].height;
+                        if (array[i][j].blocks == TerraBlocks.Water)
+                        {
+                            img[i, j] = new Rgba32(40, 50, (byte)(dnc*0.8));
+                        }
+                        else if (array[i][j].blocks == TerraBlocks.Sea)
+                        {
+                            img[i, j] = new Rgba32(30, 50, (byte)(dnc*0.98));
+                        }
+                        else if (array[i][j].blocks == TerraBlocks.Gland)
+                        {
+                            var d = 0;
+                            if (dnc > 255) { d = 255; } else { d = (int)dnc; }
+                            img[i, j] = new Rgba32(90, (byte)d, 95);
+                        }
+                    }
+
+
+                }
+                try
+                {
+                    img.Save(SavePath);
+                }
+                catch (ArgumentNullException e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+                catch (NotSupportedException ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
             }
         }
     }

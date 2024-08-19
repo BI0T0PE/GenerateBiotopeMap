@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,7 +12,6 @@ namespace BiotopeMap
     {
         public class GenerateTerra
         {
-
             private List<List<TerraInfo>> land;
             private NoiseArray river;
             private double[][] RiverArray;
@@ -23,7 +23,7 @@ namespace BiotopeMap
 
             }
 
-            public NoiseArray GenerateRiver()
+            public List<List<TerraInfo>> GenerateRiver()
             {
                 List<List<int>> list = new List<List<int>>();
                 if (river.mode == NoiseValueMode.binary)
@@ -54,61 +54,79 @@ namespace BiotopeMap
                 NoiseArray noise = new NoiseArray()
                 {
                     array = ans,
-                    mode = NoiseValueMode.binary,
+                    mode = NoiseValueMode.gradation256,
                 };
-                return noise;
+                return land;
 
             }
-            public void generate(int x, int y)
+            public void generate(int x, int y, int vx = 0, int vy = 0)
             {
                 while (true)
                 {
                     bool flag = false;
-                    int nextX = 0;
-                    int nextY = 0;
+                    bool[] landflag = new bool[9];
+                    Array.Fill(landflag, false);
+                    (double maxh, int a, int b,bool flag) maxs = new(0, 0, 0,false);
                     for (var a = -1; a <= 1; a++)
                     {
                         for (var b = -1; b <= 1; b++)
                         {
+                            int vec = vx * a + vy * b;
                             if (a == b && a == 0)
                             {
-                                flag=false;
+                                //flag = false;
+                                continue;
                             }
                             else if (x + a < 0 || y + b < 0)
                             {
-                                flag = false;
+                                continue;
+                                //flag = false;
                             }
                             else if ((x + a) >= river.array.Count || (y + b) >= river.array[x].Count)
                             {
-                                flag = false;
+                                continue;
+                                //flag = false;
                             }
                             else if (land[x + a][y + b].blocks == TerraBlocks.Water)
                             {
-                                flag = false;
+                                //flag = false;
+                                continue;
+                            }
+                            else if (land[x][y].height + vec*1.2 >= land[x + a][y + b].height)
+                            {
+                                //RiverArray[x + a][y + b] = 1;
+                                land[x + a][y + b].height = land[x + a][y + b].height - 0.04;
+                                land[x + a][y + b].blocks = TerraBlocks.Water;
+                                generate(x + a, y + b, a, b);
+                                //x = x + a;
+                                //y = y + b;
+                                flag = true;
+                                maxs.flag = true;
+                                //break;
                             }
                             else
                             {
-                                if (land[x][y].height >= land[x + a][y + b].height)
+                                if (maxs.maxh < land[x+a][y+b].height)
                                 {
-                                    RiverArray[x + a][y + b] = 1;
-                                    //generate(x + a, y + b);
-                                    x=x + a;
-                                    y=y + b;
-                                    flag = true;
+                                    maxs.maxh = land[x + a][y+b].height;
+                                    maxs.a = a;
+                                    maxs.b = b;
                                 }
-                                else
-                                {
-                                    RiverArray[x + a][y + b] = 0;
-                                    flag= false;
-                                }
+                                //RiverArray[x + a][y + b] = 0;
+                                //flag = false;
+                                continue;
                             }
                         }
                     }
-                    if (!flag)
+                    if (!maxs.flag)
                     {
-                        return;
+                        Task.Run(()=>generate(x+maxs.a,y+maxs.b,maxs.a,maxs.b));
                     }
+                    if (flag) break;
+                    else return;
                 }
+
+
             }
         }
         public class TerraArrayList

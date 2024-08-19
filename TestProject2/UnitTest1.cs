@@ -54,22 +54,33 @@ namespace TestProject2
             int scale = 1;
             NoisePram riverPram = new()
             {
-                Frequency = 2,
-                Persistence = 1,
+                Frequency = 1,
+                Persistence = 2,
                 Octaves = 3,
-                Scale = 15 * scale,
+                Scale = 50 * scale,
                 Mode = NoiseCompoundMode.plus,
             };
+            NoisePram riverPram2 = new()
+            {
+                Frequency = 1,
+                Persistence = 1,
+                Octaves = 3,
+                Scale = 1000 * scale,
+                OffsetX = -150,
+                OffsetY = 100,
+                Mode = NoiseCompoundMode.multi,
+            };
             riverPrams.Add(riverPram);
+            riverPrams.Add(riverPram2);
             NoiseArrayPram riverarrayPram = new NoiseArrayPram
             {
                 noisePrams = riverPrams,
-                h = 100 * scale,
-                w = 100 * scale,
+                h = 400 * scale,
+                w = 400 * scale,
                 mode = NoiseValueMode.binary,
                 startX = 400,
                 startY = 400,
-                threshold = 0.7
+                threshold = 0.39
 
 
             };
@@ -143,8 +154,8 @@ namespace TestProject2
             NoiseArrayPram arrayPram = new NoiseArrayPram
             {
                 noisePrams = noisePrams,
-                h = 100 * scale,
-                w = 100 * scale,
+                h = 400 * scale,
+                w = 400 * scale,
                 mode = NoiseValueMode.gradation256,
                 startX = 100,
                 startY = 100,
@@ -159,9 +170,10 @@ namespace TestProject2
             terra.baseLand=terra.ConvertTerraInfo(arry,140);
             terra.river = riverarry;
             GenerateTerra generateTerra = new GenerateTerra(terra);
-            //var river=generateTerra.GenerateRiver();
-            //img.CreateImag(river, 140);
-            img.CreateImag(arry, SavePath: path, h: 140);
+            var river=generateTerra.GenerateRiver();
+            img.CreateImag(river, 140,SavePath:"..\\rivertest.png");
+            img.CreateImag(riverarry, 140,SavePath:"..\\riverarray.png");
+            //img.CreateImag(arry, SavePath: path, h: 140);
             //var arry =grad.GetContourArray(arrayPram);
             /*for (int i = 0; i < 30; i++)
             {

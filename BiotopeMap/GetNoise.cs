@@ -13,9 +13,6 @@ namespace BiotopeMap
 {
     namespace GetNoise
     {
-        /// <summary>
-        /// 確認画像生成用クラス
-        /// </summary>
         
         public class GetNoiseArray
         {
@@ -52,13 +49,13 @@ namespace BiotopeMap
                         switch (pram.mode)
                         {
                             case NoiseValueMode.gradation256:
-                                height = Math.Round(denc * 256);
+                                height = denc * 256;
                                 break;
                             case NoiseValueMode.binary:
                                 height = denc > pram.threshold ? 1 : 0;
                                 break;
                             default:
-                                height = Math.Round(denc * 256);
+                                height = denc * 256;
                                 break;
                         }
                         lock (lockObject)
