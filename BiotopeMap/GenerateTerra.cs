@@ -15,10 +15,10 @@ namespace BiotopeMap
             private List<List<TerraInfo>> land;
             private NoiseArray river;
             private double[][] RiverArray;
-            public GenerateTerra(TerraArrayList terra)
+            public GenerateTerra(TerraArrayInfo terra)
             {
-                land = terra.baseLand;
-                river = terra.river;
+                land = terra.BaseLand;
+                river = terra.River;
                 RiverArray = new double[river.array.Count][];
 
             }
@@ -59,7 +59,7 @@ namespace BiotopeMap
                 return land;
 
             }
-            public void generate(int x, int y, int vx = 0, int vy = 0,float rate=0)
+            private void generate(int x, int y, int vx = 0, int vy = 0,float rate=0)
             {
                 while (true)
                 {
@@ -129,10 +129,22 @@ namespace BiotopeMap
 
             }
         }
-        public class TerraArrayList
+        public class TerraArrayInfo
         {
-            public List<List<TerraInfo>> baseLand { get; set; } = new();
-            public NoiseArray river { get; set; } = new NoiseArray();
+            /// <summary>
+            /// ベース地形のTerraInfo配列
+            /// </summary>
+            public List<List<TerraInfo>> BaseLand { get; set; } = new();
+            /// <summary>
+            /// 河川の生成に必要なNoiseArray配列
+            /// </summary>
+            public NoiseArray River { get; set; } = new NoiseArray();
+            /// <summary>
+            /// NoisArrayを高さを基準に地形情報に変換する
+            /// </summary>
+            /// <param name="array"></param>
+            /// <param name="h"></param>
+            /// <returns></returns>
             public List<List<TerraInfo>> ConvertTerraInfo(NoiseArray array, int h)
             {
 

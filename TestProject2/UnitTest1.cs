@@ -151,7 +151,7 @@ namespace TestProject2
             noisePrams.Add(noisePram4);
             noisePrams.Add(noisePram5);
             noisePrams.Add(noisePram6);
-            NoiseArrayPram arrayPram = new NoiseArrayPram
+            NoiseArrayPram arrayPram = new ()
             {
                 noisePrams = noisePrams,
                 h = 400 * scale,
@@ -166,9 +166,9 @@ namespace TestProject2
             string path = "..\\test.png";
             var riverarry = grad.GetContourArray(riverarrayPram);
             var arry = grad.GetContourArray(arrayPram);
-            TerraArrayList terra= new TerraArrayList();
-            terra.baseLand=terra.ConvertTerraInfo(arry,140);
-            terra.river = riverarry;
+            TerraArrayInfo terra= new TerraArrayInfo();
+            terra.BaseLand=terra.ConvertTerraInfo(arry,140);
+            terra.River = riverarry;
             GenerateTerra generateTerra = new GenerateTerra(terra);
             var river=generateTerra.GenerateRiver();
             img.CreateImag(river, 140,SavePath:"..\\testmap.png");

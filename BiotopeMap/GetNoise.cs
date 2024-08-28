@@ -23,7 +23,11 @@ namespace BiotopeMap
                 XorRand = xorRand;
             }
 
-
+            /// <summary>
+            /// 0~1のノイズを0~256に正規化する
+            /// </summary>
+            /// <param name="pram"></param>
+            /// <returns></returns>
             public NoiseArray GetContourArray(NoiseArrayPram pram)
             {
                 GetNoise getNoise = new GetNoise(XorRand);
@@ -313,7 +317,7 @@ namespace BiotopeMap
             public NoiseValueMode mode = NoiseValueMode.gradation256;
         }
         /// <summary>
-        /// a
+        /// ノイズ配列のパラメータ
         /// </summary>
         public record NoiseArrayPram
         {
