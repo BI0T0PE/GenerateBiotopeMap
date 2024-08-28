@@ -171,9 +171,9 @@ namespace TestProject2
             terra.river = riverarry;
             GenerateTerra generateTerra = new GenerateTerra(terra);
             var river=generateTerra.GenerateRiver();
-            img.CreateImag(river, 140,SavePath:"..\\rivertest.png");
-            img.CreateImag(riverarry, 140,SavePath:"..\\riverarray.png");
-            //img.CreateImag(arry, SavePath: path, h: 140);
+            img.CreateImag(river, 140,SavePath:"..\\testmap.png");
+            img.CreateImag(riverarry, 140,SavePath:"..\\riverdot.png");
+            img.CreateImag(arry, SavePath: path, h: 140);
             //var arry =grad.GetContourArray(arrayPram);
             /*for (int i = 0; i < 30; i++)
             {

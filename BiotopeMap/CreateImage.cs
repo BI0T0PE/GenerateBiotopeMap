@@ -101,7 +101,7 @@ namespace BiotopeMap
                         int dnc = (int)array[i][j].height;
                         if (array[i][j].blocks == TerraBlocks.Water)
                         {
-                            img[i, j] = new Rgba32(40, 50, (byte)(dnc*0.8));
+                            img[i, j] = new Rgba32(140, 50, (byte)(dnc*0.8));
                         }
                         else if (array[i][j].blocks == TerraBlocks.Sea)
                         {
@@ -110,8 +110,8 @@ namespace BiotopeMap
                         else if (array[i][j].blocks == TerraBlocks.Gland)
                         {
                             var d = 0;
-                            if (dnc > 255) { d = 255; } else { d = (int)dnc; }
-                            img[i, j] = new Rgba32(90, (byte)d, 95);
+                            if (dnc > 255) { d = 255; } else { d = dnc; }
+                            img[i, j] = new Rgba32((byte)(d*0.4), (byte)d, (byte)(d*0.4));
                         }
                     }
 

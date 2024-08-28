@@ -59,7 +59,7 @@ namespace BiotopeMap
                 return land;
 
             }
-            public void generate(int x, int y, int vx = 0, int vy = 0)
+            public void generate(int x, int y, int vx = 0, int vy = 0,float rate=0)
             {
                 while (true)
                 {
@@ -87,7 +87,7 @@ namespace BiotopeMap
                                 continue;
                                 //flag = false;
                             }
-                            else if (land[x + a][y + b].blocks == TerraBlocks.Water)
+                            else if (land[x + a][y + b].blocks == TerraBlocks.Water||land[x + a][y + b].blocks == TerraBlocks.Sea)
                             {
                                 //flag = false;
                                 continue;
@@ -106,7 +106,7 @@ namespace BiotopeMap
                             }
                             else
                             {
-                                if (maxs.maxh < land[x+a][y+b].height)
+                                if (maxs.maxh < land[x+a][y+b].height-vec*1.2)
                                 {
                                     maxs.maxh = land[x + a][y+b].height;
                                     maxs.a = a;
@@ -149,7 +149,7 @@ namespace BiotopeMap
                         }
                         else
                         {
-                            terra.blocks = TerraBlocks.Water;
+                            terra.blocks = TerraBlocks.Sea;
                         }
                         terra.height = (int)array.array[x][y];
                         data[y] = terra;
